@@ -1,0 +1,6 @@
+
+CONTRASEÑAS 
+
+PARA ENTRAR AL DOCKER : admi321
+
+Contraseña y user para entrar al panel: ADMIN -> admin123
