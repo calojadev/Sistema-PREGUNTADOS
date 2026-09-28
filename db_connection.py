@@ -6,7 +6,7 @@ def get_db_connection():
         user='root',
         password='admi321',
         database='Intellecto',
-        port = 3306     #PUERTO CAMBIADO POR MI CREACION EN MI DOCKER
+        port = 3308     #PUERTO CAMBIADO POR MI CREACION EN MI DOCKER
     )
     return conn
 
