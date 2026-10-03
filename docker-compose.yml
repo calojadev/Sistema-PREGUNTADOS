@@ -1,11 +1,11 @@
 services:
   db:
     image: mysql:8
-    container_name: intellecto
+    container_name: ingenia
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: admi321
-      MYSQL_DATABASE: Intellecto
+      MYSQL_DATABASE: Ingenia
     ports:
       - "3308:3306"
     volumes:

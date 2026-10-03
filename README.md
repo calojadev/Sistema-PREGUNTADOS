@@ -23,6 +23,6 @@
 
 ## Notas
 
-- La base de datos se llama `Intellecto`, corre en el contenedor `intellecto` y se expone en el puerto `3308` (usuario `root`, contraseña `admi321`).
+- La base de datos se llama `Ingenia`, corre en el contenedor `ingenia` y se expone en el puerto `3308` (usuario `root`, contraseña `admi321`).
 - Los datos persisten entre reinicios gracias al volumen `db_data`. Para reiniciar la base desde cero: `docker compose down -v` y luego `docker compose up -d`.
 - El esquema de la base está versionado en [db/init.sql](db/init.sql); ya no es necesario copiar el `CREATE TABLE` manualmente desde el `.docx`.

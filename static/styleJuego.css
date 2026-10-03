@@ -348,6 +348,50 @@ body {
   opacity: 0.6;
 }
 
+/* ---------- GATE DE BOTONERAS ---------- */
+.btn-habilitar-botoneras {
+  display: block;
+  margin: 15px auto;
+  padding: 14px 30px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  background: linear-gradient(135deg, #ff6b9d, #4facfe);
+  color: #fff;
+}
+.btn-habilitar-botoneras:hover {
+  filter: brightness(1.08);
+}
+
+/* ---------- PANEL DE JUICIO MANUAL (fases Directa / Pizarra) ---------- */
+.panel-juicio-manual {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 10px 0;
+}
+.btn-juicio {
+  padding: 15px 30px;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #fff;
+}
+.btn-juicio:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.btn-juicio-correcto {
+  background: #28a745;
+}
+.btn-juicio-incorrecto {
+  background: #c0392b;
+}
+
 /* ---------- EQUIPOS QUE RESPONDEN ---------- */
 .seleccion-equipo-responder h4 {
   margin-bottom: 15px;

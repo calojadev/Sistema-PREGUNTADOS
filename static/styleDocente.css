@@ -273,6 +273,22 @@ li .item-text {
   color: var(--muted);
   font-weight: 800;
   letter-spacing: 0.2px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+#btnReiniciarUsadas {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--warn);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+#btnReiniciarUsadas:hover {
+  filter: brightness(1.08);
 }
 
 /* ======= Inline Editors ======= */

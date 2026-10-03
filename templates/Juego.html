@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Intellecto Unida</title>
+  <title>Ingenia Unida</title>
 
   <!-- Fuente Poppins garantizada -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -19,13 +19,13 @@
   </div>
 
   <div class="main-container">
-    <h1 class="title">INTELLECTO</h1>
+    <h1 class="title">INGENIA</h1>
 
     <div id="tournament-status" class="tournament-status" style="display:none;"></div>
 
     <!-- Banner de desempate (controlado por JS) -->
     <div id="desempate-banner" class="desempate-banner" style="display:none;">
-      🔥 Muerte súbita por empate: se jugará 1 pregunta decisiva.
+      🔥 Empate: se juega un desempate a mejor de 3 preguntas.
     </div>
 
     <div id="competition-area" class="competition-area">
@@ -40,8 +40,8 @@
         </div>
 
         <div id="question-container" class="question-container" style="display:none;">
-          <div class="category-tag">Categoría: <strong id="categoria-seleccionada"></strong></div>
-          
+          <div class="category-tag">Modalidad: <strong id="categoria-seleccionada"></strong></div>
+
           <!-- NUEVO: Contenedor para pregunta texto o imagen -->
           <div id="pregunta-content-wrapper" class="pregunta-content-wrapper">
             <h3 id="pregunta-titulo"></h3>
@@ -50,7 +50,12 @@
             </div>
           </div>
 
-          <div id="seleccion-equipo-responder" class="seleccion-equipo-responder">
+          <!-- Gate de botoneras: habilitar manualmente tras leer la pregunta -->
+          <button id="btn-habilitar-botoneras" class="btn-habilitar-botoneras" style="display:none;">
+            🔔 Habilitar Botoneras
+          </button>
+
+          <div id="seleccion-equipo-responder" class="seleccion-equipo-responder" style="display:none;">
             <h4>¿Quién responde?</h4>
             <div id="equipos-selector-respuesta" class="equipos-selector-respuesta"></div>
           </div>
@@ -59,6 +64,12 @@
 
           <!-- Contenedor de opciones (sin innerHTML) -->
           <div id="opciones-respuesta" class="opciones-respuesta" style="display:none;"></div>
+
+          <!-- Panel de juicio manual del presentador (fases Directa / Pizarra) -->
+          <div id="panel-juicio-manual" class="panel-juicio-manual" style="display:none;">
+            <button id="btn-juicio-correcto" class="btn-juicio btn-juicio-correcto">✅ Correcto</button>
+            <button id="btn-juicio-incorrecto" class="btn-juicio btn-juicio-incorrecto">❌ Incorrecto</button>
+          </div>
 
           <!-- Contenedor de feedback -->
           <div id="feedback-container" class="feedback-container" style="display:none;"></div>

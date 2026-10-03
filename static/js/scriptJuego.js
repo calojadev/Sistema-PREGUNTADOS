@@ -7,6 +7,9 @@ document.addEventListener("DOMContentLoaded", () => {
     "pregunta-imagen-container",
   );
   const preguntaImagen = document.getElementById("pregunta-imagen");
+  const btnHabilitarBotoneras = document.getElementById(
+    "btn-habilitar-botoneras",
+  );
   const seleccionEquipoResponder = document.getElementById(
     "seleccion-equipo-responder",
   );
@@ -15,6 +18,9 @@ document.addEventListener("DOMContentLoaded", () => {
   );
   const temporizadorEl = document.getElementById("temporizador");
   const opcionesRespuesta = document.getElementById("opciones-respuesta");
+  const panelJuicioManual = document.getElementById("panel-juicio-manual");
+  const btnJuicioCorrecto = document.getElementById("btn-juicio-correcto");
+  const btnJuicioIncorrecto = document.getElementById("btn-juicio-incorrecto");
   const teamDisplay1 = document.getElementById("team-display-1");
   const teamDisplay2 = document.getElementById("team-display-2");
   const gameArea = document.getElementById("game-area");
@@ -44,9 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
     totalPreguntasPorEnfrentamiento: 3,
     puntosEnfrentamiento: [0, 0],
     equipoActivoIdx: -1,
-    esDesempate: false,
     totalEnfrentamientosTorneo: 0,
     enfrentamientoGlobalActual: 0,
+    totalRondasTorneo: 1,
+    faseActual: 1, // 1 = Cuartos, 2 = Semifinal, 3 = Final
+    desempate: { activo: false, puntos: [0, 0], preguntasJugadas: 0 },
   };
   let preguntaActual = null;
   let temporizador = null;
@@ -72,32 +80,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }, ttl);
   }
 
+  // ---- Mapeo ronda de bracket -> fase del torneo ----
+  // Se cuenta desde el final: la última ronda jugada es la Final, la
+  // anteúltima la Semifinal, y todas las anteriores son Cuartos de Final.
+  function calcularFase(ronda, totalRondas) {
+    if (ronda === totalRondas) return 3;
+    if (ronda === totalRondas - 1) return 2;
+    return 1;
+  }
+
   // ===== INICIALIZACIÓN DEL JUEGO CON DATOS DE LA API =====
   async function initGame() {
     try {
-      const [materiasRes, equiposRes, preguntasRes, configRes] =
+      const [equiposRes, preguntasRes, configRes, fasesRes] =
         await Promise.all([
-          fetch("/api/materias"),
           fetch("/api/equipos"),
-          fetch("/api/preguntas"),
+          fetch("/api/preguntas?solo_disponibles=1"),
           fetch("/api/configuracion"),
+          fetch("/api/fases"),
         ]);
 
-      if (
-        !materiasRes.ok ||
-        !equiposRes.ok ||
-        !preguntasRes.ok ||
-        !configRes.ok
-      ) {
+      if (!equiposRes.ok || !preguntasRes.ok || !configRes.ok || !fasesRes.ok) {
         throw new Error(
           "No se pudieron cargar los datos del juego desde el servidor.",
         );
       }
 
-      const materias = await materiasRes.json();
       const equipos = await equiposRes.json();
       const preguntas = await preguntasRes.json();
       const configDB = await configRes.json();
+      const fases = await fasesRes.json();
 
       estadoJuego.totalPreguntasPorEnfrentamiento = configDB.cantidad;
 
@@ -108,15 +120,22 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "/docente";
         return;
       }
-      if (materias.length === 0 || preguntas.length === 0) {
+      if (preguntas.length === 0) {
         alert(
-          "Se necesita al menos una materia y una pregunta para jugar. Volviendo al panel del docente.",
+          "Se necesita al menos una pregunta disponible para jugar. Volviendo al panel del docente.",
+        );
+        window.location.href = "/docente";
+        return;
+      }
+      if (!fases || fases.length === 0) {
+        alert(
+          "No se encontró la configuración de fases del torneo. Volviendo al panel del docente.",
         );
         window.location.href = "/docente";
         return;
       }
 
-      runGame(materias, equipos, preguntas);
+      runGame(equipos, preguntas, fases);
     } catch (error) {
       console.error("Error fatal al iniciar el juego:", error);
       alert("Error de conexión. No se pudo iniciar el juego.");
@@ -125,11 +144,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ===== LÓGICA PRINCIPAL DEL JUEGO (RUN GAME) =====
-  function runGame(materias, todosLosEquipos, todasLasPreguntas) {
+  function runGame(todosLosEquipos, todasLasPreguntas, fasesConfig) {
     let preguntasDisponibles = [...todasLasPreguntas];
+    let turnoState = { equiposIntentaron: [false, false] };
+
+    const fasesPorId = new Map(fasesConfig.map((f) => [f.id_fase, f]));
+    function obtenerFaseActual() {
+      return fasesPorId.get(estadoJuego.faseActual);
+    }
 
     function iniciarTorneo() {
       estadoJuego.totalEnfrentamientosTorneo = todosLosEquipos.length - 1;
+      estadoJuego.totalRondasTorneo = Math.max(
+        1,
+        Math.ceil(Math.log2(todosLosEquipos.length)),
+      );
+      estadoJuego.faseActual = calcularFase(
+        estadoJuego.torneoRonda,
+        estadoJuego.totalRondasTorneo,
+      );
 
       const equiposOrdenados = todosLosEquipos.map((e) => ({
         nombre: e.nombre_equipo,
@@ -159,41 +192,45 @@ document.addEventListener("DOMContentLoaded", () => {
       iniciarEnfrentamiento();
     }
 
-    function mostrarResultado(categoria) {
-      const preguntasParaCategoria = preguntasDisponibles.filter(
-        (p) => p.materia_nombre === categoria.nombre,
-      );
+    function elegirPreguntaAlAzar() {
+      const fase = obtenerFaseActual();
+      let candidatas = preguntasDisponibles;
+      if (fase.tipo_respuesta === "pizarra") {
+        const conImagen = preguntasDisponibles.filter((p) => p.imagen_url);
+        if (conImagen.length > 0) {
+          candidatas = conImagen;
+        } else {
+          showToast(
+            "Sin preguntas con imagen para la Final; se usa una sin imagen.",
+            "warn",
+          );
+        }
+      }
+      const idx = Math.floor(Math.random() * candidatas.length);
+      return candidatas[idx];
+    }
+
+    function mostrarResultado() {
+      const fase = obtenerFaseActual();
 
       gameArea.style.display = "none";
       preguntaContainer.style.display = "block";
       feedbackContainer.style.display = "none";
-      categoriaSeleccionadaSpan.textContent = categoria.nombre;
+      categoriaSeleccionadaSpan.textContent = fase.nombre;
 
-      if (preguntasParaCategoria.length === 0) {
-        preguntaTitulo.textContent =
-          "No hay más preguntas para esta categoría.";
-        preguntaImagenContainer.style.display = "none";
-        setTimeout(siguientePregunta, 1500);
-        return;
-      }
-
-      const indiceAleatorio = Math.floor(
-        Math.random() * preguntasParaCategoria.length,
-      );
-      preguntaActual = preguntasParaCategoria[indiceAleatorio];
-
+      preguntaActual = elegirPreguntaAlAzar();
       preguntasDisponibles = preguntasDisponibles.filter(
         (p) => p.id_pregunta !== preguntaActual.id_pregunta,
       );
+      fetch(`/api/preguntas/${preguntaActual.id_pregunta}/marcar-usada`, {
+        method: "PUT",
+      }).catch(() => {});
 
-      // NUEVO: Lógica para mostrar texto O imagen
       if (preguntaActual.imagen_url) {
-        // Si tiene imagen, mostrar solo la imagen
         preguntaTitulo.style.display = "none";
         preguntaImagen.src = preguntaActual.imagen_url;
         preguntaImagenContainer.style.display = "block";
       } else {
-        // Si NO tiene imagen, mostrar el texto
         preguntaTitulo.textContent = preguntaActual.pregunta;
         preguntaTitulo.style.display = "block";
         preguntaImagenContainer.style.display = "none";
@@ -207,17 +244,23 @@ document.addEventListener("DOMContentLoaded", () => {
         : "";
 
       clearChildren(opcionesRespuesta);
-      const opcionesMezcladas = [...preguntaActual.respuestas].sort(
-        () => Math.random() - 0.5,
-      );
-      opcionesMezcladas.forEach((op) => {
-        const b = document.createElement("button");
-        b.className = "btn-opcion";
-        b.textContent = op.respuesta;
-        b.disabled = true;
-        b.onclick = () => responder(estadoJuego.equipoActivoIdx, op.respuesta);
-        opcionesRespuesta.appendChild(b);
-      });
+      if (fase.tipo_respuesta === "opcion_multiple") {
+        const opcionesMezcladas = [...preguntaActual.respuestas].sort(
+          () => Math.random() - 0.5,
+        );
+        opcionesMezcladas.forEach((op) => {
+          const b = document.createElement("button");
+          b.className = "btn-opcion";
+          b.textContent = op.respuesta;
+          b.disabled = true;
+          b.onclick = () =>
+            resolverRespuesta(
+              estadoJuego.equipoActivoIdx,
+              norm(op.respuesta) === norm(respuestaCorrectaTexto),
+            );
+          opcionesRespuesta.appendChild(b);
+        });
+      }
 
       clearChildren(equiposSelectorRespuesta);
       const enJuego =
@@ -230,8 +273,17 @@ document.addEventListener("DOMContentLoaded", () => {
         equiposSelectorRespuesta.appendChild(b);
       });
 
-      seleccionEquipoResponder.style.display = "block";
+      turnoState = { equiposIntentaron: [false, false] };
+      seleccionEquipoResponder.style.display = "none";
       opcionesRespuesta.style.display = "none";
+      panelJuicioManual.style.display = "none";
+      btnHabilitarBotoneras.style.display = "block";
+      btnHabilitarBotoneras.disabled = false;
+    }
+
+    function habilitarBotoneras() {
+      btnHabilitarBotoneras.style.display = "none";
+      seleccionEquipoResponder.style.display = "block";
     }
 
     function setFeedback(texto, tipo) {
@@ -250,9 +302,27 @@ document.addEventListener("DOMContentLoaded", () => {
         .forEach((b) => (b.disabled = !enabled));
     }
 
+    function setJuicioEnabled(enabled) {
+      btnJuicioCorrecto.disabled = !enabled;
+      btnJuicioIncorrecto.disabled = !enabled;
+    }
+
     function setDesempateUI(on) {
       if (desempateBanner)
         desempateBanner.style.display = on ? "block" : "none";
+    }
+
+    function mostrarPanelRespuesta() {
+      const fase = obtenerFaseActual();
+      if (fase.tipo_respuesta === "opcion_multiple") {
+        opcionesRespuesta.style.display = "flex";
+        panelJuicioManual.style.display = "none";
+        setOpcionesEnabled(true);
+      } else {
+        panelJuicioManual.style.display = "flex";
+        opcionesRespuesta.style.display = "none";
+        setJuicioEnabled(true);
+      }
     }
 
     function iniciarEnfrentamiento() {
@@ -267,6 +337,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       estadoJuego.preguntaActualEnfrentamiento = 0;
       estadoJuego.puntosEnfrentamiento = [0, 0];
+      estadoJuego.desempate = { activo: false, puntos: [0, 0], preguntasJugadas: 0 };
       setDesempateUI(false);
       siguientePregunta();
     }
@@ -283,34 +354,24 @@ document.addEventListener("DOMContentLoaded", () => {
       prepararTurnoUI();
     }
 
-    function actualizarCategoriasRuleta() {
-      const materiasConPreguntas = new Set(
-        preguntasDisponibles.map((p) => p.materia_nombre),
-      );
-      categoriasRuleta = materias
-        .filter((m) => materiasConPreguntas.has(m.materia_nombre))
-        .map((m) => ({ nombre: m.materia_nombre }));
-
-      if (categoriasRuleta.length === 0 && !animando) {
-        showToast(
-          "¡Felicidades! Han respondido todas las preguntas disponibles.",
-          "info",
-          3000,
-        );
-        setTimeout(finalizarJuego, 1000);
-      }
-    }
-
     function prepararTurnoUI() {
       preguntaContainer.style.display = "none";
       matchWinnerDisplay.style.display = "none";
       botonSiguiente.style.display = "none";
       gameArea.style.display = "flex";
 
-      actualizarCategoriasRuleta();
-      dibujarRuleta();
+      if (preguntasDisponibles.length === 0) {
+        showToast(
+          "¡Felicidades! Han respondido todas las preguntas disponibles.",
+          "info",
+          3000,
+        );
+        setTimeout(finalizarJuego, 1000);
+        return;
+      }
 
-      botonGirar.disabled = categoriasRuleta.length === 0;
+      dibujarRuleta();
+      botonGirar.disabled = false;
 
       actualizarUI();
       updateArrowPosition();
@@ -321,13 +382,27 @@ document.addEventListener("DOMContentLoaded", () => {
       const [e1, e2] =
         estadoJuego.enfrentamientosRonda[estadoJuego.enfrentamientoActualIdx];
       if (p1 === p2) {
-        estadoJuego.esDesempate = true;
+        estadoJuego.desempate = { activo: true, puntos: [0, 0], preguntasJugadas: 0 };
         setDesempateUI(true);
-        showToast("Empate → muerte súbita (1 pregunta decisiva)", "warn", 2600);
+        showToast("Empate → desempate a mejor de 3 preguntas", "warn", 2600);
         prepararTurnoUI();
       } else {
-        const ganador = p1 > p2 ? e1 : e2;
+        mostrarGanadorDelEnfrentamiento(p1 > p2 ? e1 : e2);
+      }
+    }
+
+    function evaluarDesempate() {
+      const [d1, d2] = estadoJuego.desempate.puntos;
+      const [e1, e2] =
+        estadoJuego.enfrentamientosRonda[estadoJuego.enfrentamientoActualIdx];
+      if (d1 >= 2 || d2 >= 2) {
+        const ganador = d1 >= 2 ? e1 : e2;
+        estadoJuego.desempate.activo = false;
+        setDesempateUI(false);
         mostrarGanadorDelEnfrentamiento(ganador);
+      } else {
+        estadoJuego.desempate.preguntasJugadas++;
+        prepararTurnoUI();
       }
     }
 
@@ -351,6 +426,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       estadoJuego.torneoRonda++;
+      estadoJuego.faseActual = calcularFase(
+        estadoJuego.torneoRonda,
+        estadoJuego.totalRondasTorneo,
+      );
       const prox = [...estadoJuego.ganadoresRonda];
       estadoJuego.ganadoresRonda = [];
       estadoJuego.enfrentamientoActualIdx = 0;
@@ -392,47 +471,62 @@ document.addEventListener("DOMContentLoaded", () => {
     window.seleccionarEquipoParaResponder = (idx) => {
       estadoJuego.equipoActivoIdx = idx;
       seleccionEquipoResponder.style.display = "none";
-      opcionesRespuesta.style.display = "flex";
-      setOpcionesEnabled(true);
-      iniciarTemporizador(idx);
+      mostrarPanelRespuesta();
+      iniciarTemporizador(obtenerFaseActual().tiempo_segundos);
     };
 
-    function responder(equipoRespondeIdx, opcionSeleccionada) {
+    function cederTurno(idx) {
+      estadoJuego.equipoActivoIdx = idx;
+      mostrarPanelRespuesta();
+      iniciarTemporizador(obtenerFaseActual().tiempo_segundos);
+    }
+
+    function registrarPunto(idx) {
+      if (estadoJuego.desempate.activo) estadoJuego.desempate.puntos[idx]++;
+      else estadoJuego.puntosEnfrentamiento[idx]++;
+      actualizarUI();
+    }
+
+    function avanzarTrasResolucion() {
+      if (estadoJuego.desempate.activo) evaluarDesempate();
+      else siguientePregunta();
+    }
+
+    function resolverRespuesta(equipoIdx, esCorrecta) {
       detenerTemporizador();
       setOpcionesEnabled(false);
-      const esCorrecta =
-        norm(opcionSeleccionada) === norm(respuestaCorrectaTexto);
-      if (estadoJuego.esDesempate) {
-        if (esCorrecta) {
-          const equipos =
-            estadoJuego.enfrentamientosRonda[
-              estadoJuego.enfrentamientoActualIdx
-            ];
-          const ganador = equipos[equipoRespondeIdx];
-          estadoJuego.esDesempate = false;
-          setDesempateUI(false);
-          setFeedback(`¡${ganador.nombre} gana el desempate!`, "correct");
-          setTimeout(() => mostrarGanadorDelEnfrentamiento(ganador), 2000);
-        } else {
-          setFeedback(
-            "Incorrecto. Se vuelve a girar para continuar el desempate.",
-            "incorrect",
-          );
-          setTimeout(() => {
-            feedbackContainer.style.display = "none";
-            prepararTurnoUI();
-          }, 1800);
-        }
+      setJuicioEnabled(false);
+
+      if (esCorrecta) {
+        registrarPunto(equipoIdx);
+        const nombreEq =
+          estadoJuego.enfrentamientosRonda[estadoJuego.enfrentamientoActualIdx][
+            equipoIdx
+          ].nombre;
+        setFeedback(`¡Correcto! Punto para ${nombreEq}.`, "correct");
+        setTimeout(avanzarTrasResolucion, 2000);
         return;
       }
-      if (esCorrecta) {
-        setFeedback("¡Correcto!", "correct");
-        estadoJuego.puntosEnfrentamiento[equipoRespondeIdx]++;
+
+      const otroIdx = equipoIdx === 0 ? 1 : 0;
+      const esPrimerFallo =
+        !turnoState.equiposIntentaron[0] && !turnoState.equiposIntentaron[1];
+      turnoState.equiposIntentaron[equipoIdx] = true;
+
+      if (esPrimerFallo) {
+        const nombreOtro =
+          estadoJuego.enfrentamientosRonda[estadoJuego.enfrentamientoActualIdx][
+            otroIdx
+          ].nombre;
+        setFeedback(`Incorrecto. Pasa el turno a ${nombreOtro}.`, "incorrect");
+        setTimeout(() => {
+          feedbackContainer.style.display = "none";
+          cederTurno(otroIdx);
+        }, 1800);
       } else {
-        setFeedback("Incorrecto.", "incorrect");
+        setFeedback("Ningún equipo respondió correctamente.", "incorrect");
+        setTimeout(avanzarTrasResolucion, 1800);
       }
-      actualizarUI();
-      setTimeout(siguientePregunta, 2000);
     }
 
     function renderTeamCard(container, equipo, idxPuntos) {
@@ -444,8 +538,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       card.querySelector(".team-title").textContent = equipo.nombre;
 
+      const puntosFuente = estadoJuego.desempate.activo
+        ? estadoJuego.desempate.puntos
+        : estadoJuego.puntosEnfrentamiento;
       card.querySelector(".score").textContent = String(
-        estadoJuego.puntosEnfrentamiento[idxPuntos],
+        puntosFuente[idxPuntos],
       );
 
       const iconContainer = card.querySelector(".team-icon");
@@ -484,17 +581,21 @@ document.addEventListener("DOMContentLoaded", () => {
       const enf =
         estadoJuego.enfrentamientosRonda[estadoJuego.enfrentamientoActualIdx];
       if (!enf) return;
-      tournamentStatus.textContent = estadoJuego.esDesempate
-        ? "🔥 ¡MUERTE SÚBITA POR EMPATE! 🔥"
-        : `Enfrentamiento ${estadoJuego.enfrentamientoGlobalActual} de ${estadoJuego.totalEnfrentamientosTorneo} | Pregunta ${estadoJuego.preguntaActualEnfrentamiento} de ${estadoJuego.totalPreguntasPorEnfrentamiento}`;
+      const nombreFase = obtenerFaseActual().nombre;
+      if (estadoJuego.desempate.activo) {
+        const [d1, d2] = estadoJuego.desempate.puntos;
+        tournamentStatus.textContent = `🔥 ${nombreFase} — DESEMPATE (mejor de 3): ${d1} - ${d2} 🔥`;
+      } else {
+        tournamentStatus.textContent = `${nombreFase} | Enfrentamiento ${estadoJuego.enfrentamientoGlobalActual} de ${estadoJuego.totalEnfrentamientosTorneo} | Pregunta ${estadoJuego.preguntaActualEnfrentamiento} de ${estadoJuego.totalPreguntasPorEnfrentamiento}`;
+      }
       tournamentStatus.style.display = "block";
       const [e1, e2] = enf;
       renderTeamCard(teamDisplay1, e1, 0);
       renderTeamCard(teamDisplay2, e2, 1);
     }
 
-    function iniciarTemporizador() {
-      let t = 15;
+    function iniciarTemporizador(segundos) {
+      let t = segundos;
       temporizadorEl.style.display = "block";
       const draw = () => {
         temporizadorEl.textContent = `⏰ ${t}s`;
@@ -505,10 +606,7 @@ document.addEventListener("DOMContentLoaded", () => {
         draw();
         if (t <= 0) {
           detenerTemporizador();
-          setFeedback(
-            "Tiempo terminado.\nSeleccione la opción que indicó el Jugador.",
-            "info",
-          );
+          resolverRespuesta(estadoJuego.equipoActivoIdx, false);
         }
       }, 1000);
     }
@@ -518,11 +616,20 @@ document.addEventListener("DOMContentLoaded", () => {
       temporizadorEl.style.display = "none";
     }
 
-    let categoriasRuleta = materias.map((m) => ({ nombre: m.materia_nombre }));
+    // ---- Ruleta de modalidad: Múltiple / Directa / Pizarra ----
+    // Los 3 sectores son fijos y el giro siempre debe terminar en el
+    // sector correspondiente a la fase actual (no es azar): es un efecto
+    // ceremonial que confirma visualmente la modalidad de la ronda.
+    const categoriasRuleta = [
+      { nombre: "Múltiple", tipo: "opcion_multiple" },
+      { nombre: "Directa", tipo: "directa" },
+      { nombre: "Pizarra", tipo: "pizarra" },
+    ];
+    const coloresRuleta = ["#3498db", "#2ecc71", "#e67e22"];
+
     let ruletaCtx = setupHiDPICanvas(ruletaCanvas);
-    let anguloActual = 0,
-      velocidad = 0,
-      animando = false;
+    let anguloActual = 0;
+    let animando = false;
 
     function setupHiDPICanvas(canvas) {
       const dpr = window.devicePixelRatio || 1;
@@ -548,25 +655,11 @@ document.addEventListener("DOMContentLoaded", () => {
       ruletaCtx.clearRect(0, 0, size, size);
 
       const totalSectores = categoriasRuleta.length;
-      if (totalSectores === 0) return;
-
       const anguloPorSector = (2 * Math.PI) / totalSectores;
-
-      // 1 color por categoría (7 en tu caso)
-      const coloresRuleta = [
-        "#2ecc71", // LOGICA
-        "#e67e22", // PIZZARRA
-        "#3498db", // ALGEBRA
-        "#9b59b6", // CALCULO
-        "#e74c3c", // ESTADISTICA
-        "#c016a6", // GEOMETRIA
-        "#f1c40f", // INGENIERIA
-      ];
 
       for (let i = 0; i < totalSectores; i++) {
         const angI = anguloActual + i * anguloPorSector;
 
-        // un color fijo para cada sector
         ruletaCtx.fillStyle = coloresRuleta[i];
 
         ruletaCtx.beginPath();
@@ -593,32 +686,64 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    function animar() {
-      if (!animando) return;
-      velocidad *= 0.985;
-      if (velocidad < 0.001) {
-        animando = false;
-        velocidad = 0;
-        const totalSectores = categoriasRuleta.length;
-        const anguloPorSector = (2 * Math.PI) / totalSectores;
-        const angParada = anguloActual % (2 * Math.PI);
-        const angFlecha = 1.5 * Math.PI;
-        const angRel = (angFlecha - angParada + 2 * Math.PI) % (2 * Math.PI);
-        const idx = Math.floor(angRel / anguloPorSector);
-        if (categoriasRuleta[idx]) mostrarResultado(categoriasRuleta[idx]);
-        return;
-      }
-      anguloActual += velocidad;
-      dibujarRuleta();
-      requestAnimationFrame(animar);
+    function easeOutCubic(x) {
+      return 1 - Math.pow(1 - x, 3);
     }
 
-    botonGirar.onclick = () => {
-      if (animando || categoriasRuleta.length === 0) return;
+    function girarRuletaHacia(idxObjetivo) {
       animando = true;
       botonGirar.disabled = true;
-      velocidad = Math.random() * 0.25 + 0.25;
-      animar();
+
+      const anguloInicio = anguloActual;
+      const totalSectores = categoriasRuleta.length;
+      const anguloPorSector = (2 * Math.PI) / totalSectores;
+      const angFlecha = 1.5 * Math.PI;
+
+      const angRelDeseado = idxObjetivo * anguloPorSector + anguloPorSector / 2;
+      const angParadaDeseado =
+        (((angFlecha - angRelDeseado) % (2 * Math.PI)) + 2 * Math.PI) %
+        (2 * Math.PI);
+      const anguloInicioMod =
+        ((anguloInicio % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+
+      let delta = angParadaDeseado - anguloInicioMod;
+      delta = ((delta % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+
+      const vueltasExtra = 4 + Math.floor(Math.random() * 3); // 4 a 6 vueltas, solo efecto visual
+      const anguloObjetivo =
+        anguloInicio + delta + vueltasExtra * 2 * Math.PI;
+
+      const duracionMs = 3200;
+      const inicioTs = performance.now();
+
+      function paso(ts) {
+        const t = Math.min(1, (ts - inicioTs) / duracionMs);
+        const avance = easeOutCubic(t);
+        anguloActual = anguloInicio + (anguloObjetivo - anguloInicio) * avance;
+        dibujarRuleta();
+        if (t < 1) {
+          requestAnimationFrame(paso);
+        } else {
+          animando = false;
+          mostrarResultado();
+        }
+      }
+      requestAnimationFrame(paso);
+    }
+
+    btnHabilitarBotoneras.onclick = habilitarBotoneras;
+    btnJuicioCorrecto.onclick = () =>
+      resolverRespuesta(estadoJuego.equipoActivoIdx, true);
+    btnJuicioIncorrecto.onclick = () =>
+      resolverRespuesta(estadoJuego.equipoActivoIdx, false);
+
+    botonGirar.onclick = () => {
+      if (animando) return;
+      const fase = obtenerFaseActual();
+      const idxObjetivo = categoriasRuleta.findIndex(
+        (c) => c.tipo === fase.tipo_respuesta,
+      );
+      girarRuletaHacia(idxObjetivo);
     };
 
     window.addEventListener("resize", () => {

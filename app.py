@@ -22,7 +22,7 @@ db_config = {
     "host": "localhost",
     "user": "root",
     "password": "admi321",
-    "database": "Intellecto",
+    "database": "Ingenia",
     "port": "3308"
 }
 
@@ -222,10 +222,13 @@ def manage_preguntas():
     if request.method == 'GET':
         filtro_materia_id = request.args.get('materia_id')
         filtro_texto = request.args.get('texto')
+        filtro_disponibles = request.args.get('solo_disponibles')
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        query = "SELECT p.id_pregunta, p.pregunta, p.imagen_url, m.id_materia, m.materia_nombre FROM preguntas p JOIN materias m ON p.id_materia = m.id_materia WHERE p.estado = 1"
+        query = "SELECT p.id_pregunta, p.pregunta, p.imagen_url, p.usada, m.id_materia, m.materia_nombre FROM preguntas p JOIN materias m ON p.id_materia = m.id_materia WHERE p.estado = 1"
         params = []
+        if filtro_disponibles in ('1', 'true', 'True'):
+            query += " AND p.usada = 0"
         if filtro_materia_id:
             query += " AND p.id_materia = %s"
             params.append(filtro_materia_id)
@@ -388,6 +391,75 @@ def manage_pregunta_item(pregunta_id):
             cursor.close()
             conn.close()
         return jsonify({"success": True})
+
+@app.route('/api/preguntas/<int:pregunta_id>/marcar-usada', methods=['PUT'])
+def marcar_pregunta_usada(pregunta_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE preguntas SET usada = 1 WHERE id_pregunta = %s", (pregunta_id,))
+        conn.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Pregunta no encontrada"}), 404
+    except mysql.connector.Error as err:
+        conn.rollback()
+        return jsonify({"error": f"Error en la base de datos: {err}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"success": True})
+
+@app.route('/api/preguntas/reiniciar-usadas', methods=['POST'])
+def reiniciar_preguntas_usadas():
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autorizado"}), 401
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE preguntas SET usada = 0 WHERE usada = 1")
+        conn.commit()
+        afectadas = cursor.rowcount
+    except mysql.connector.Error as err:
+        conn.rollback()
+        return jsonify({"error": f"Error en la base de datos: {err}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"success": True, "reiniciadas": afectadas})
+
+### API para Fases del torneo ###
+@app.route('/api/fases', methods=['GET'])
+def get_fases():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT id_fase, nombre, tipo_respuesta, tiempo_segundos FROM fases ORDER BY id_fase")
+    fases = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return jsonify(fases)
+
+@app.route('/api/fases/<int:fase_id>', methods=['PUT'])
+def update_fase(fase_id):
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autorizado"}), 401
+    data = request.get_json()
+    tiempo = data.get('tiempo_segundos')
+    if tiempo is None or not isinstance(tiempo, int) or tiempo < 1:
+        return jsonify({"error": "tiempo_segundos debe ser un entero positivo"}), 400
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("UPDATE fases SET tiempo_segundos = %s WHERE id_fase = %s", (tiempo, fase_id))
+        conn.commit()
+        if cursor.rowcount == 0:
+            return jsonify({"error": "Fase no encontrada"}), 404
+    except mysql.connector.Error as err:
+        conn.rollback()
+        return jsonify({"error": f"Error en la base de datos: {err}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+    return jsonify({"success": True, "id_fase": fase_id, "tiempo_segundos": tiempo})
 
 ### API para Equipos ###
 @app.route('/api/equipos', methods=['GET', 'POST'])

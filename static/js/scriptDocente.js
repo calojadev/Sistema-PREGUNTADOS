@@ -5,11 +5,15 @@ document.addEventListener("DOMContentLoaded", () => {
   let preguntas = [];
   let equipos = [];
   let configuracion = { rondas: 1, grupo: "mañana" };
+  let fases = [];
   let imagenPreguntaFile = null; // NUEVO: Variable para almacenar el archivo de imagen
 
   // ===== Refs DOM =====
   const rondasInput = document.getElementById("rondasInput");
   const grupoSelect = document.getElementById("grupoSelect");
+  const tiempoFase1Input = document.getElementById("tiempoFase1");
+  const tiempoFase2Input = document.getElementById("tiempoFase2");
+  const tiempoFase3Input = document.getElementById("tiempoFase3");
   const materiaInput = document.getElementById("materia");
   const materiasList = document.getElementById("materiasList");
   const tplMateriaItem = document.getElementById("tpl-materia-item");
@@ -141,6 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
           fetch("/api/materias"),
           fetch("/api/equipos"),
           fetch("/api/configuracion"),
+          fetch("/api/fases"),
         ]);
 
         if (responses.some((res) => !res.ok)) {
@@ -149,15 +154,15 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         }
 
-        const [materiasData, equiposData, configData] = await Promise.all(
-          responses.map((res) => res.json())
-        );
+        const [materiasData, equiposData, configData, fasesData] =
+          await Promise.all(responses.map((res) => res.json()));
 
         materias = materiasData;
         equipos = equiposData;
         preguntas = [];
         configuracion.rondas = configData.cantidad;
         rondasInput.value = configuracion.rondas;
+        fases = fasesData;
 
         render();
         return;
@@ -177,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
         fetch("/api/equipos"),
         fetch(preguntasUrl),
         fetch("/api/configuracion"),
+        fetch("/api/fases"),
       ]);
 
       if (responses.some((res) => res.status === 401)) {
@@ -187,7 +193,7 @@ document.addEventListener("DOMContentLoaded", () => {
         throw new Error("Una de las solicitudes de datos al servidor falló.");
       }
 
-      const [materiasData, equiposData, preguntasData, configData] =
+      const [materiasData, equiposData, preguntasData, configData, fasesData] =
         await Promise.all(responses.map((res) => res.json()));
 
       materias = materiasData;
@@ -195,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
       preguntas = preguntasData;
       configuracion.rondas = configData.cantidad;
       rondasInput.value = configuracion.rondas;
+      fases = fasesData;
 
       render();
     } catch (error) {
@@ -415,6 +422,47 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       showToast("Error al guardar la configuración.", "warn");
       rondasInput.value = configuracion.rondas;
+    }
+  }
+
+  async function saveFaseTiempo(idFase, inputEl) {
+    const fase = fases.find((f) => f.id_fase === idFase);
+    const nuevoTiempo = parseInt(inputEl.value, 10);
+    if (!nuevoTiempo || nuevoTiempo < 1) {
+      if (fase) inputEl.value = fase.tiempo_segundos;
+      return;
+    }
+    const response = await fetch(`/api/fases/${idFase}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tiempo_segundos: nuevoTiempo }),
+    });
+    if (response.ok) {
+      if (fase) fase.tiempo_segundos = nuevoTiempo;
+      showToast("Tiempo de fase actualizado.");
+    } else {
+      showToast("Error al guardar el tiempo de la fase.", "warn");
+      if (fase) inputEl.value = fase.tiempo_segundos;
+    }
+  }
+
+  async function reiniciarPreguntasUsadas() {
+    if (
+      !confirm(
+        "¿Reiniciar el estado de 'usada' de todas las preguntas? Volverán a poder salir en el juego."
+      )
+    )
+      return;
+    const response = await fetch("/api/preguntas/reiniciar-usadas", {
+      method: "POST",
+    });
+    if (response.ok) {
+      const data = await response.json();
+      showToast(`Preguntas reiniciadas: ${data.reiniciadas}.`);
+      loadInitialData();
+    } else {
+      const err = await response.json();
+      showToast(err.error || "Error al reiniciar preguntas.", "warn");
     }
   }
 
@@ -688,18 +736,37 @@ document.addEventListener("DOMContentLoaded", () => {
     filtroMateria.value = prevFiltro;
   }
 
+  function renderFases() {
+    const fase1 = fases.find((f) => f.id_fase === 1);
+    const fase2 = fases.find((f) => f.id_fase === 2);
+    const fase3 = fases.find((f) => f.id_fase === 3);
+    if (fase1) tiempoFase1Input.value = fase1.tiempo_segundos;
+    if (fase2) tiempoFase2Input.value = fase2.tiempo_segundos;
+    if (fase3) tiempoFase3Input.value = fase3.tiempo_segundos;
+  }
+
   function render() {
     grupoSelect.value = configuracion.grupo;
     renderMaterias();
     renderEquipos();
     renderSelects();
     renderPreguntas();
+    renderFases();
   }
 
   // ===== Listeners =====
   filtroMateria.addEventListener("change", loadInitialData);
   filtroTexto.addEventListener("input", loadInitialData);
   rondasInput.addEventListener("change", saveConfigToDB);
+  tiempoFase1Input.addEventListener("change", () =>
+    saveFaseTiempo(1, tiempoFase1Input)
+  );
+  tiempoFase2Input.addEventListener("change", () =>
+    saveFaseTiempo(2, tiempoFase2Input)
+  );
+  tiempoFase3Input.addEventListener("change", () =>
+    saveFaseTiempo(3, tiempoFase3Input)
+  );
   materiaInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") addMateria();
   });
@@ -714,6 +781,7 @@ document.addEventListener("DOMContentLoaded", () => {
   window.addMateria = addMateria;
   window.addEquipo = addEquipo;
   window.addPregunta = addPregunta;
+  window.reiniciarPreguntasUsadas = reiniciarPreguntasUsadas;
 
   // ===== INICIO =====
   loadInitialData();

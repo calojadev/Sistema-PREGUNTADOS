@@ -42,6 +42,20 @@
               <option value="tarde">Tarde</option>
             </select>
           </div>
+
+          <h3>⏱️ Tiempo por fase (segundos)</h3>
+          <div class="form-row">
+            <label for="tiempoFase1">Cuartos de Final (Múltiple):</label>
+            <input type="number" id="tiempoFase1" min="1" placeholder="10" />
+          </div>
+          <div class="form-row">
+            <label for="tiempoFase2">Semifinal (Directa):</label>
+            <input type="number" id="tiempoFase2" min="1" placeholder="10" />
+          </div>
+          <div class="form-row">
+            <label for="tiempoFase3">Final (Pizarra):</label>
+            <input type="number" id="tiempoFase3" min="1" placeholder="60" />
+          </div>
         </section>
 
         <!-- ============== MATERIAS ============== -->
@@ -322,6 +336,9 @@
 
   <div class="stats">
     <span id="preguntas-count">0 Preguntas Cargadas</span>
+    <button type="button" id="btnReiniciarUsadas" onclick="reiniciarPreguntasUsadas()">
+      🔄 Reiniciar preguntas usadas
+    </button>
   </div>
 </section>
 
