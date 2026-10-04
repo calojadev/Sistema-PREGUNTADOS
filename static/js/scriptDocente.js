@@ -4,13 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
   let materias = [];
   let preguntas = [];
   let equipos = [];
-  let configuracion = { rondas: 1, grupo: "mañana" };
+  let configuracion = { rondas: 1 };
   let fases = [];
   let imagenPreguntaFile = null; // NUEVO: Variable para almacenar el archivo de imagen
 
   // ===== Refs DOM =====
   const rondasInput = document.getElementById("rondasInput");
-  const grupoSelect = document.getElementById("grupoSelect");
   const tiempoFase1Input = document.getElementById("tiempoFase1");
   const tiempoFase2Input = document.getElementById("tiempoFase2");
   const tiempoFase3Input = document.getElementById("tiempoFase3");
@@ -746,7 +745,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function render() {
-    grupoSelect.value = configuracion.grupo;
     renderMaterias();
     renderEquipos();
     renderSelects();

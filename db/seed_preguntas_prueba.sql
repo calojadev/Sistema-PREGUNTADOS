@@ -1,130 +1,130 @@
--- Preguntas de prueba para verificar el funcionamiento del sistema.
--- 5 preguntas por categoria, cada una con 1 respuesta correcta y 2 incorrectas.
--- Requiere que las categorias ya existan en la tabla `materias`:
---   Mecanica (id 3), Termodinamica (id 4), Elegtromagnetismo (id 5)
+-- Datos de prueba para verificar el funcionamiento del nuevo formato de competencia.
+-- En este modelo las "materias" representan el tipo de ronda, no un tema:
+--   Multiple -> Fase 1 (Cuartos de Final, selección múltiple)
+--   Directa  -> Fase 2 (Semifinal, respuesta directa / juicio del presentador)
+--   Pizarra  -> Fase 3 (Final, resolución en pizarra con imagen / juicio del presentador)
+-- Uso: docker exec -i <container> mysql -uroot -padmi321 Ingenia < db/seed_preguntas_prueba.sql
 
--- ===================== MECANICA CLASICA =====================
+INSERT IGNORE INTO materias (materia_nombre) VALUES ('Multiple'), ('Directa'), ('Pizarra');
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (3, '¿Cuál es la unidad de fuerza en el Sistema Internacional?');
+-- ===================== FASE 1: MULTIPLE (selección múltiple) =====================
+
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿Cuál es la unidad de fuerza en el Sistema Internacional?' FROM materias WHERE materia_nombre = 'Multiple';
 SET @p := LAST_INSERT_ID();
 INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
     (@p, 'Newton', 1),
     (@p, 'Julio', 0),
     (@p, 'Pascal', 0);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (3, '¿Qué instrumento se utiliza para medir la masa de un objeto?');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿Qué instrumento se utiliza para medir la masa de un objeto?' FROM materias WHERE materia_nombre = 'Multiple';
 SET @p := LAST_INSERT_ID();
 INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
     (@p, 'Balanza', 1),
     (@p, 'Termómetro', 0),
     (@p, 'Barómetro', 0);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (3, 'Según la primera ley de Newton, un cuerpo en reposo permanece en reposo a menos que...');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, 'Según la primera ley de Newton, un cuerpo en reposo permanece en reposo a menos que...' FROM materias WHERE materia_nombre = 'Multiple';
 SET @p := LAST_INSERT_ID();
 INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
     (@p, 'Actúe sobre él una fuerza neta', 1),
     (@p, 'Se caliente lo suficiente', 0),
     (@p, 'Cambie de color', 0);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (3, '¿En qué unidad se mide la velocidad en el Sistema Internacional?');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿En qué unidad se mide la velocidad en el Sistema Internacional?' FROM materias WHERE materia_nombre = 'Multiple';
 SET @p := LAST_INSERT_ID();
 INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
     (@p, 'Metros por segundo (m/s)', 1),
     (@p, 'Newton (N)', 0),
     (@p, 'Vatio (W)', 0);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (3, '¿Qué tipo de energía posee un objeto en movimiento?');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿Qué tipo de energía posee un objeto en movimiento?' FROM materias WHERE materia_nombre = 'Multiple';
 SET @p := LAST_INSERT_ID();
 INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
     (@p, 'Energía cinética', 1),
     (@p, 'Energía potencial', 0),
     (@p, 'Energía térmica', 0);
 
--- ===================== TERMODINAMICA =====================
+-- ===================== FASE 2: DIRECTA (juicio del presentador) =====================
+-- Una sola respuesta registrada (la correcta): es la referencia del presentador,
+-- no se muestra en pantalla. El equipo responde de palabra.
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (4, '¿Cuál es la unidad de temperatura en el Sistema Internacional?');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿Cuál es la unidad de temperatura en el Sistema Internacional?' FROM materias WHERE materia_nombre = 'Directa';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Kelvin', 1),
-    (@p, 'Newton', 0),
-    (@p, 'Pascal', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'Kelvin', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (4, '¿Qué instrumento se utiliza para medir la temperatura?');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿Qué instrumento se utiliza para medir la temperatura?' FROM materias WHERE materia_nombre = 'Directa';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Termómetro', 1),
-    (@p, 'Barómetro', 0),
-    (@p, 'Amperímetro', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'Termómetro', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (4, 'La primera ley de la termodinámica está relacionada con la conservación de...');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, 'La primera ley de la termodinámica está relacionada con la conservación de...' FROM materias WHERE materia_nombre = 'Directa';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'La energía', 1),
-    (@p, 'La masa', 0),
-    (@p, 'La carga eléctrica', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'La energía', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (4, '¿En qué unidad se mide la presión en el Sistema Internacional?');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿En qué unidad se mide la presión en el Sistema Internacional?' FROM materias WHERE materia_nombre = 'Directa';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Pascal', 1),
-    (@p, 'Kelvin', 0),
-    (@p, 'Vatio', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'Pascal', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (4, '¿Cómo se llama el proceso en el que un gas se expande sin intercambiar calor con su entorno?');
+INSERT INTO preguntas (id_materia, pregunta)
+SELECT id_materia, '¿Cómo se llama el proceso en el que un gas se expande sin intercambiar calor con su entorno?' FROM materias WHERE materia_nombre = 'Directa';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Proceso adiabático', 1),
-    (@p, 'Proceso isotérmico', 0),
-    (@p, 'Proceso isobárico', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'Proceso adiabático', 1);
 
--- ===================== ELECTROMAGNETISMO =====================
+-- ===================== FASE 3: PIZARRA (imagen + juicio del presentador) =====================
+-- Reutiliza imágenes de ejercicios ya subidas en static/uploads/preguntas/
+-- (quedaron en disco de una sesión de prueba anterior). El texto de la pregunta
+-- no se muestra cuando hay imagen, pero se guarda como referencia administrativa.
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (5, '¿Cuál es la unidad de carga eléctrica en el Sistema Internacional?');
+INSERT INTO preguntas (id_materia, pregunta, imagen_url)
+SELECT id_materia, 'Resuelve la ecuación en la pizarra.', '/uploads/preguntas/1763382152_RESUELVE.jpg' FROM materias WHERE materia_nombre = 'Pizarra';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Coulomb', 1),
-    (@p, 'Newton', 0),
-    (@p, 'Vatio', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'x = -1', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (5, '¿Qué instrumento se utiliza para medir la corriente eléctrica?');
+INSERT INTO preguntas (id_materia, pregunta, imagen_url)
+SELECT id_materia, 'Resuelve la ecuación en la pizarra.', '/uploads/preguntas/1763382019_RESUELVE_2.jpg' FROM materias WHERE materia_nombre = 'Pizarra';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Amperímetro', 1),
-    (@p, 'Voltímetro', 0),
-    (@p, 'Termómetro', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'x = 5', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (5, '¿Cuál es la unidad de resistencia eléctrica?');
+INSERT INTO preguntas (id_materia, pregunta, imagen_url)
+SELECT id_materia, 'Evalúa el límite en la pizarra.', '/uploads/preguntas/1763331404_CALCULO-Evalua_el_limite.jpg' FROM materias WHERE materia_nombre = 'Pizarra';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Ohm', 1),
-    (@p, 'Faradio', 0),
-    (@p, 'Henrio', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, '2', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (5, '¿Qué partícula subatómica tiene carga eléctrica negativa?');
+INSERT INTO preguntas (id_materia, pregunta, imagen_url)
+SELECT id_materia, 'Resuelve el sistema de ecuaciones en la pizarra.', '/uploads/preguntas/1763385423_PREGUNTA-1.jpg' FROM materias WHERE materia_nombre = 'Pizarra';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Electrón', 1),
-    (@p, 'Protón', 0),
-    (@p, 'Neutrón', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, '(x,y) = (3,2) o (2,3)', 1);
 
-INSERT INTO preguntas (id_materia, pregunta) VALUES
-    (5, '¿Cuál es la unidad de campo magnético en el Sistema Internacional?');
+INSERT INTO preguntas (id_materia, pregunta, imagen_url)
+SELECT id_materia, 'Simplifica la expresión en la pizarra.', '/uploads/preguntas/1763385408_PREGUNTA-2.jpg' FROM materias WHERE materia_nombre = 'Pizarra';
 SET @p := LAST_INSERT_ID();
-INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES
-    (@p, 'Tesla', 1),
-    (@p, 'Voltio', 0),
-    (@p, 'Amperio', 0);
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, '(2x + 3) / x', 1);
+
+INSERT INTO preguntas (id_materia, pregunta, imagen_url)
+SELECT id_materia, 'Calcula la derivada en la pizarra.', '/uploads/preguntas/1763385393_PREGUNTA-3.jpg' FROM materias WHERE materia_nombre = 'Pizarra';
+SET @p := LAST_INSERT_ID();
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, "f'(x) = 24x^5 - 15x^4 + 8x^3 - 3x^2 + 14x - 5", 1);
+
+INSERT INTO preguntas (id_materia, pregunta, imagen_url)
+SELECT id_materia, 'Resuelve por la fórmula cuadrática en la pizarra.', '/uploads/preguntas/1763385382_PREGUNTA-4.jpg' FROM materias WHERE materia_nombre = 'Pizarra';
+SET @p := LAST_INSERT_ID();
+INSERT INTO respuestas (id_pregunta, respuesta, es_correcta) VALUES (@p, 'x = 1/2 o x = -2', 1);
+
+-- ===================== EQUIPOS DE PRUEBA =====================
+-- 5 equipos -> bracket de 3 rondas completas (Cuartos con 1 bye, Semifinal, Final),
+-- suficiente para recorrer las 3 fases en una sola partida de prueba.
+
+INSERT IGNORE INTO equipos (nombre_equipo) VALUES
+    ('Equipo Alfa'),
+    ('Equipo Beta'),
+    ('Equipo Gamma'),
+    ('Equipo Delta'),
+    ('Equipo Épsilon');

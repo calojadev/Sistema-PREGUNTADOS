@@ -469,7 +469,6 @@ li,
 .config-section {
   padding: 14px;
   border-radius: var(--r-lg);
-  max-height: 200px;
 }
 .config-section .form-row {
   grid-template-columns: 1fr 1fr;

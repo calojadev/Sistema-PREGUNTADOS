@@ -192,11 +192,31 @@ document.addEventListener("DOMContentLoaded", () => {
       iniciarEnfrentamiento();
     }
 
+    // Las materias representan el tipo de ronda: cada fase busca sus
+    // preguntas en la materia homónima ("Multiple", "Directa", "Pizarra").
+    const MATERIA_POR_TIPO = {
+      opcion_multiple: "Multiple",
+      directa: "Directa",
+      pizarra: "Pizarra",
+    };
+
     function elegirPreguntaAlAzar() {
       const fase = obtenerFaseActual();
-      let candidatas = preguntasDisponibles;
+      const materiaFase = MATERIA_POR_TIPO[fase.tipo_respuesta];
+
+      let candidatas = preguntasDisponibles.filter(
+        (p) => p.materia_nombre === materiaFase,
+      );
+      if (candidatas.length === 0) {
+        candidatas = preguntasDisponibles;
+        showToast(
+          `Sin preguntas en la materia "${materiaFase}"; se usa una de otra materia.`,
+          "warn",
+        );
+      }
+
       if (fase.tipo_respuesta === "pizarra") {
-        const conImagen = preguntasDisponibles.filter((p) => p.imagen_url);
+        const conImagen = candidatas.filter((p) => p.imagen_url);
         if (conImagen.length > 0) {
           candidatas = conImagen;
         } else {
@@ -206,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
           );
         }
       }
+
       const idx = Math.floor(Math.random() * candidatas.length);
       return candidatas[idx];
     }
