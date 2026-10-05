@@ -329,23 +329,57 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 15px;
+  counter-reset: opcion;
 }
 .btn-opcion {
-  width: 80%;
-  padding: 15px;
-  font-size: 1rem;
-  text-align: center;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  background: #f9f9f9;
+  position: relative;
+  width: 90%;
+  padding: 14px 20px 14px 56px;
+  font-family: inherit;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-align: left;
+  color: #1f2d3d;
+  border: 2px solid #4facfe;
+  border-radius: 12px;
+  background: #fff;
   cursor: pointer;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+/* Letra de la opción: A, B, C */
+.btn-opcion::before {
+  counter-increment: opcion;
+  content: counter(opcion, upper-alpha);
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  text-align: center;
+  font-weight: 800;
+  color: #fff;
+  background: #4facfe;
+  border-radius: 50%;
 }
 .btn-opcion:hover:not(:disabled) {
-  background: #eee;
+  background: #e8f4ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.35);
 }
+/* Deshabilitada: se puede leer con claridad pero no responder todavía */
 .btn-opcion:disabled {
-  opacity: 0.6;
+  cursor: not-allowed;
+  color: #1f2d3d;
+  background: #f1f5f9;
+  border-style: dashed;
+  border-color: #b6c3d1;
+}
+.btn-opcion:disabled::before {
+  background: #8fa3b8;
 }
 
 /* ---------- GATE DE BOTONERAS ---------- */
@@ -390,6 +424,84 @@ body {
 }
 .btn-juicio-incorrecto {
   background: #c0392b;
+}
+.panel-jurado-final {
+  text-align: center;
+  margin: 10px 0;
+}
+.panel-jurado-final h4 {
+  margin-bottom: 12px;
+}
+.btn-siguiente-enunciado {
+  background: #3498db;
+  margin: 15px auto 0;
+  display: block;
+}
+.btn-equipo-selector.acierto {
+  background: #28a745;
+  color: #fff;
+}
+.seleccion-ganador-final {
+  background: #fff;
+  color: #333;
+  padding: 25px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+.seleccion-ganador-final h3 {
+  font-size: 1.6rem;
+  margin-bottom: 15px;
+}
+.ganador-final-resumen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  background: #f1f7fb;
+  border-radius: 15px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+.marcador-equipo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+.marcador-nombre {
+  font-weight: 600;
+  font-size: 1rem;
+}
+.marcador-puntos {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #278ea5;
+  line-height: 1.1;
+}
+.marcador-sep {
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+}
+.seleccion-ganador-final .btn-equipo-selector {
+  padding: 14px 28px;
+  font-size: 1.1rem;
+  transition: transform 0.15s, background 0.15s;
+}
+.seleccion-ganador-final .btn-equipo-selector:hover {
+  background: #1d6f82;
+  transform: translateY(-2px);
+}
+.btn-detener-tiempo {
+  background: #c0392b;
+  margin: 10px auto;
+}
+.btn-transferir-turno {
+  background: #e67e22;
+  margin: 10px auto;
 }
 
 /* ---------- EQUIPOS QUE RESPONDEN ---------- */

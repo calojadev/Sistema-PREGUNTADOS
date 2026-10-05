@@ -71,11 +71,36 @@
             <button id="btn-juicio-incorrecto" class="btn-juicio btn-juicio-incorrecto">❌ Incorrecto</button>
           </div>
 
+          <!-- Final (Pizarra): detener el tiempo si un equipo ya resolvió -->
+          <button id="btn-detener-tiempo" class="btn-juicio btn-detener-tiempo" style="display:none;">
+            ⏹️ DETENER TIEMPO
+          </button>
+
+          <!-- Final (Pizarra): el jurado anota quién acertó y avanza -->
+          <div id="panel-jurado-final" class="panel-jurado-final" style="display:none;">
+            <h4>Jurado: ¿quién resolvió bien este enunciado?</h4>
+            <div id="jurado-equipos" class="equipos-selector-respuesta"></div>
+            <button id="btn-siguiente-enunciado" class="btn-juicio btn-siguiente-enunciado"></button>
+          </div>
+
+          <!-- Aparece al agotarse el tiempo de respuesta -->
+          <button id="btn-transferir-turno" class="btn-juicio btn-transferir-turno" style="display:none;">
+            🔁 Transferir turno
+          </button>
+
           <!-- Contenedor de feedback -->
           <div id="feedback-container" class="feedback-container" style="display:none;"></div>
         </div>
 
-        <div id="match-winner-display" class="match-winner-display" style="display:none;">
+        <!-- Final: el jurado elige al ganador tras los 3 enunciados -->
+        <div id="seleccion-ganador-final" class="seleccion-ganador-final" style="display:none;">
+          <div class="category-tag">🏆 Final</div>
+          <h3>¿Quién ganó la Final?</h3>
+          <div id="ganador-final-resumen" class="ganador-final-resumen"></div>
+          <div id="ganador-final-equipos" class="equipos-selector-respuesta"></div>
+        </div>
+
+        <div id="match-winner-display"class="match-winner-display" style="display:none;">
           <h3>Ganador del Enfrentamiento</h3>
           <h2 id="match-winner-name"></h2>
         </div>
