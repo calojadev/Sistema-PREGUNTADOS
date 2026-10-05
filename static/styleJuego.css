@@ -11,12 +11,45 @@
 :root {
   /* Tamaño de la ruleta: más pequeña y responsiva */
   --ruleta-size: clamp(290px, 21vw, 340px);
+
+  /* Paleta del evento INGENIA UNIDA 2026: azul y blanco */
+  --navy-950: #050a3a;
+  --navy-900: #0a1156;
+  --navy-800: #101a73;
+  --blue-600: #1f3fc4;
+  --blue-500: #3b63f0;
+  --blue-100: #e6ecff;
+  --blue-50: #f3f6ff;
+  --ink: #0a1156;
+  --muted: #5b6694;
+  --line: #d5ddf7;
+  --r-card: 28px;
 }
 
 body {
-  font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  background: linear-gradient(135deg, #1f4287, #278ea5, #21e6c1);
+  font-family:
+    "Poppins",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  /* Fondo azul noche con halos desenfocados, como el flyer */
+  background:
+    radial-gradient(
+      ellipse at 85% 0%,
+      rgba(59, 99, 240, 0.35),
+      transparent 45%
+    ),
+    radial-gradient(
+      ellipse at 0% 70%,
+      rgba(59, 99, 240, 0.25),
+      transparent 40%
+    ),
+    var(--navy-900);
+  background-attachment: fixed;
   color: #fff;
   min-height: 100vh;
   display: flex;
@@ -39,6 +72,11 @@ body {
   height: 100px;
 }
 
+.logo-ingenia {
+  height: 150px;
+  margin-bottom: 50px;
+}
+
 /* ---------- ENCABEZADO Y ESTADO ---------- */
 .main-container {
   display: flex;
@@ -51,19 +89,21 @@ body {
   font-size: 3rem;
   font-weight: 800;
   margin-bottom: 20px;
-  color: #ffd700;
+  color: #fff;
+  letter-spacing: 1px;
 }
 .tournament-status {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   padding: 8px 20px;
   border-radius: 20px;
   margin-bottom: 12px;
   font-size: 1.1rem;
 }
 .desempate-banner {
-  background: rgba(255, 215, 0, 0.18);
-  border: 2px dashed #ffd700;
-  color: #ffd700;
+  background: rgba(255, 255, 255, 0.12);
+  border: 2px dashed #fff;
+  color: #fff;
   padding: 8px 16px;
   border-radius: 14px;
   margin-bottom: 20px;
@@ -87,11 +127,11 @@ body {
 }
 
 .team-card {
-  background: linear-gradient(135deg, #ffcc33, #f7b500);
-  backdrop-filter: blur(5px);
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  border-radius: 20px;
+  background: #fff;
+  color: var(--ink);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 10px 30px rgba(2, 6, 40, 0.45);
+  border-radius: var(--r-card);
   padding: 25px;
   width: 240px;
   text-align: center;
@@ -107,13 +147,15 @@ body {
   margin-bottom: 15px;
 }
 .team-card .points-container {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 10px;
+  background: var(--blue-50);
+  border: 1px solid var(--line);
+  border-radius: 14px;
   padding: 10px;
 }
 .team-card .score {
   font-size: 2.5rem;
   font-weight: 800;
+  color: var(--blue-600);
 }
 .team-card .points-label {
   font-size: 0.8rem;
@@ -121,54 +163,53 @@ body {
 }
 
 .team-icon img.team-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #fff;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--blue-600);
 }
 
 /* Ocultamos el input nativo */
 .file-input {
-    display: none;
+  display: none;
 }
 
 /* Botón "Seleccionar archivo" */
 .file-label {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: #ffffff;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--blue-50);
+  color: var(--blue-600);
+  border: 1px solid var(--blue-600);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 /* Texto de estado debajo */
 .file-status {
-    margin-top: 4px;
-    font-size: 11px;
-    color: #fff;
-    opacity: 0.9;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
 }
 
 /* Avatar cuando ya se cargó imagen */
 .team-icon img.team-avatar {
-    width: 85px;
-    height: 85px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #fff;
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--blue-600);
 }
 
 .team-icon {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
 }
-
 
 /* ---------- JUEGO Y RULETA ---------- */
 .game-column {
@@ -189,8 +230,8 @@ body {
   width: var(--ruleta-size);
   height: var(--ruleta-size);
   border-radius: 50%;
-  border: 8px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 25px rgba(0, 0, 0, 0.3);
+  border: 8px solid #fff;
+  box-shadow: 0 0 30px rgba(2, 6, 40, 0.5);
 }
 
 /* Flecha apuntadora (posición vertical la calcula JS) */
@@ -214,24 +255,29 @@ body {
   font-weight: 700;
   border-radius: 50px;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .btn-spin {
   margin-top: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-  background: linear-gradient(135deg, #ff6b9d, #4facfe);
-  color: #fff;
+  border: 2px solid #fff;
+  box-shadow: 0 6px 16px rgba(2, 6, 40, 0.4);
+  background: #fff;
+  color: var(--blue-600);
 }
 .btn-spin:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  background: var(--blue-100);
 }
 .btn-next {
-  border: none;
-  background: #28a745;
-  color: #fff;
+  border: 2px solid #fff;
+  background: #fff;
+  color: var(--blue-600);
   margin-top: 20px;
+}
+.btn-next:hover {
+  background: var(--blue-100);
 }
 /* Botón Ir al Panel Docente */
 .btn-fixed-bottom {
@@ -241,10 +287,10 @@ body {
   padding: 10px 20px;
   font-size: 1rem;
   font-weight: 600;
-  background: #34495e;
+  background: var(--navy-800);
   color: #fff;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
   cursor: pointer;
   z-index: 1000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -252,10 +298,9 @@ body {
 }
 
 .btn-fixed-bottom:hover {
-  background: #2c3e50;
+  background: var(--blue-600);
   transform: translateY(-2px);
 }
-
 
 .btn-logout {
   position: fixed;
@@ -264,10 +309,10 @@ body {
   padding: 10px 20px;
   font-size: 1rem;
   font-weight: 600;
-  background: #34495e;
+  background: var(--navy-800);
   color: #fff;
-  border: none;
-  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
   cursor: pointer;
   z-index: 1100;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
@@ -276,22 +321,23 @@ body {
 }
 
 .btn-logout:hover {
-  background: #2c3e50;
+  background: var(--blue-600);
   transform: translateY(-2px);
 }
 
 /* ---------- PREGUNTAS Y RESPUESTAS ---------- */
 .question-container {
   background: #fff;
-  color: #333;
+  color: var(--ink);
   padding: 25px;
-  border-radius: 20px;
+  border-radius: var(--r-card);
   width: 100%;
   max-width: 500px;
   text-align: center;
+  box-shadow: 0 10px 30px rgba(2, 6, 40, 0.45);
 }
 .category-tag {
-  background-color: #4facfe;
+  background-color: var(--blue-600);
   color: #fff;
   padding: 5px 15px;
   border-radius: 15px;
@@ -307,7 +353,7 @@ body {
 .pregunta-content-wrapper h3 {
   font-size: 1.4rem;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--ink);
 }
 
 .pregunta-imagen-container {
@@ -341,12 +387,15 @@ body {
   font-size: 1.15rem;
   font-weight: 600;
   text-align: left;
-  color: #1f2d3d;
-  border: 2px solid #4facfe;
-  border-radius: 12px;
+  color: var(--ink);
+  border: 2px solid var(--blue-600);
+  border-radius: 14px;
   background: #fff;
   cursor: pointer;
-  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+  transition:
+    background 0.15s,
+    transform 0.15s,
+    box-shadow 0.15s;
 }
 /* Letra de la opción: A, B, C */
 .btn-opcion::before {
@@ -362,24 +411,24 @@ body {
   text-align: center;
   font-weight: 800;
   color: #fff;
-  background: #4facfe;
+  background: var(--blue-600);
   border-radius: 50%;
 }
 .btn-opcion:hover:not(:disabled) {
-  background: #e8f4ff;
+  background: var(--blue-50);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 172, 254, 0.35);
+  box-shadow: 0 4px 12px rgba(31, 63, 196, 0.3);
 }
 /* Deshabilitada: se puede leer con claridad pero no responder todavía */
 .btn-opcion:disabled {
   cursor: not-allowed;
-  color: #1f2d3d;
-  background: #f1f5f9;
+  color: var(--ink);
+  background: var(--blue-50);
   border-style: dashed;
-  border-color: #b6c3d1;
+  border-color: #aab6e0;
 }
 .btn-opcion:disabled::before {
-  background: #8fa3b8;
+  background: #8f9bcc;
 }
 
 /* ---------- GATE DE BOTONERAS ---------- */
@@ -392,11 +441,11 @@ body {
   border: none;
   border-radius: 25px;
   cursor: pointer;
-  background: linear-gradient(135deg, #ff6b9d, #4facfe);
+  background: var(--blue-600);
   color: #fff;
 }
 .btn-habilitar-botoneras:hover {
-  filter: brightness(1.08);
+  background: var(--blue-500);
 }
 
 /* ---------- PANEL DE JUICIO MANUAL (fases Directa / Pizarra) ---------- */
@@ -433,7 +482,7 @@ body {
   margin-bottom: 12px;
 }
 .btn-siguiente-enunciado {
-  background: #3498db;
+  background: var(--blue-600);
   margin: 15px auto 0;
   display: block;
 }
@@ -443,13 +492,13 @@ body {
 }
 .seleccion-ganador-final {
   background: #fff;
-  color: #333;
+  color: var(--ink);
   padding: 25px;
-  border-radius: 20px;
+  border-radius: var(--r-card);
   width: 100%;
   max-width: 500px;
   text-align: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 30px rgba(2, 6, 40, 0.45);
 }
 .seleccion-ganador-final h3 {
   font-size: 1.6rem;
@@ -460,7 +509,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 15px;
-  background: #f1f7fb;
+  background: var(--blue-50);
+  border: 1px solid var(--line);
   border-radius: 15px;
   padding: 15px;
   margin-bottom: 20px;
@@ -478,21 +528,23 @@ body {
 .marcador-puntos {
   font-size: 2.5rem;
   font-weight: 800;
-  color: #278ea5;
+  color: var(--blue-600);
   line-height: 1.1;
 }
 .marcador-sep {
   font-weight: 700;
-  color: #999;
+  color: var(--muted);
   text-transform: uppercase;
 }
 .seleccion-ganador-final .btn-equipo-selector {
   padding: 14px 28px;
   font-size: 1.1rem;
-  transition: transform 0.15s, background 0.15s;
+  transition:
+    transform 0.15s,
+    background 0.15s;
 }
 .seleccion-ganador-final .btn-equipo-selector:hover {
-  background: #1d6f82;
+  background: var(--blue-500);
   transform: translateY(-2px);
 }
 .btn-detener-tiempo {
@@ -520,7 +572,7 @@ body {
   border-radius: 20px;
   border: none;
   cursor: pointer;
-  background: #278ea5;
+  background: var(--blue-600);
   color: #fff;
 }
 
@@ -554,8 +606,9 @@ body {
 }
 .match-winner-display {
   text-align: center;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--r-card);
   padding: 30px;
   width: 100%;
   max-width: 500px;
@@ -565,7 +618,7 @@ body {
 }
 .match-winner-display h2 {
   font-size: 2.5rem;
-  color: #ffd700;
+  color: #fff;
 }
 
 /* ---------- MODAL FINAL ---------- */
@@ -576,15 +629,17 @@ body {
   top: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(5, 10, 58, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
 }
 .modal-content {
-  background: linear-gradient(145deg, #3a1c71, #d76d77, #ffaf7b);
+  background: var(--navy-800);
+  border: 2px solid #fff;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   padding: 40px;
-  border-radius: 20px;
+  border-radius: var(--r-card);
   text-align: center;
   width: 90%;
   max-width: 500px;
@@ -595,7 +650,7 @@ body {
 }
 .modal-content h3 {
   font-size: 2.5rem;
-  color: #ffd700;
+  color: #fff;
   margin-bottom: 30px;
 }
 #btn-reiniciar {
@@ -604,7 +659,12 @@ body {
   font-weight: bold;
   border-radius: 25px;
   border: none;
+  background: #fff;
+  color: var(--blue-600);
   cursor: pointer;
+}
+#btn-reiniciar:hover {
+  background: var(--blue-100);
 }
 
 /* ---------- TOASTS ---------- */
@@ -620,7 +680,8 @@ body {
   pointer-events: none;
 }
 .toast {
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--navy-950);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   color: #fff;
   font-weight: 700;
   padding: 10px 16px;
@@ -634,7 +695,7 @@ body {
   background: #c0392b;
 }
 .toast--ok {
-  background: #16a085;
+  background: var(--blue-600);
 }
 @keyframes toastIn {
   from {

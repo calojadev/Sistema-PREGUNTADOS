@@ -1,27 +1,35 @@
 /* =========================================
-   Panel Docente — Opción 2: Pro UI Minimal
+   Panel Docente — paleta INGENIA UNIDA 2026 (azul y blanco)
    (sin @import, 100% compatible con tu HTML/JS)
    ========================================= */
 
 :root {
-  /* Paleta profesional (neutra + acento azul) */
-  --bg: #f6f7fb;
+  /* Paleta del evento: azul marino + azul + blanco */
+  --navy-950: #050a3a;
+  --navy-900: #0a1156;
+  --navy-800: #101a73;
+  --blue-600: #1f3fc4;
+  --blue-500: #3b63f0;
+  --blue-100: #e6ecff;
+  --blue-50: #f3f6ff;
+  --bg: #f3f6ff;
   --surface: #ffffff;
-  --muted: #6b7280; /* gris 500 */
-  --muted-2: #9ca3af; /* gris 400 */
-  --text: #0b1220; /* gris casi negro */
-  --primary: #155eef; /* azul pro */
-  --primary-2: #2563eb; /* azul medio */
-  --accent: #0ea5e9; /* cyan para detalles */
+  --muted: #5b6694;
+  --muted-2: #8f9bcc;
+  --text: #0a1156;
+  --primary: #1f3fc4;
+  --primary-2: #3b63f0;
+  --accent: #3b63f0;
+  /* Semánticos: se mantienen para acciones (guardar / editar / borrar) */
   --success: #16a34a; /* verde */
   --warn: #d97706; /* amber */
   --danger: #ef4444; /* rojo */
-  --line: #e5e7eb; /* borde suave */
-  --shadow-1: 0 10px 20px rgba(2, 6, 23, 0.06);
-  --shadow-2: 0 16px 32px rgba(2, 6, 23, 0.08);
+  --line: #d5ddf7; /* borde suave azulado */
+  --shadow-1: 0 10px 20px rgba(10, 17, 86, 0.08);
+  --shadow-2: 0 16px 32px rgba(10, 17, 86, 0.14);
 
   /* Radios y espaciado */
-  --r-xl: 18px;
+  --r-xl: 24px;
   --r-lg: 14px;
   --r-md: 12px;
   --pad: 16px;
@@ -31,32 +39,51 @@
 * {
   box-sizing: border-box;
 }
-html,
-body {
+html {
   height: 100%;
 }
 body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell,
-    "Helvetica Neue", Arial, "Noto Sans";
+  min-height: 100%;
+  font-family: "Poppins", system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+    Cantarell, "Helvetica Neue", Arial, "Noto Sans";
   margin: 0;
   color: var(--text);
+  /* Cabecera azul noche con halos desenfocados, como el flyer */
   background: radial-gradient(
-      1000px 600px at 15% -20%,
-      #eaf1ff 0%,
-      transparent 60%
+      ellipse at 85% 0%,
+      rgba(59, 99, 240, 0.35),
+      transparent 45%
     ),
-    radial-gradient(900px 500px at 110% 10%, #e7fbff 0%, transparent 60%),
-    var(--bg);
+    radial-gradient(ellipse at 0% 30%, rgba(59, 99, 240, 0.25), transparent 40%),
+    var(--navy-900);
+  background-repeat: no-repeat;
   padding: 28px 20px 90px;
+  position: relative;
+}
+/* Hoja blanca con esquina superior muy redondeada (sección inferior del flyer) */
+body::after {
+  content: "";
+  position: absolute;
+  top: 130px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg);
+  border-radius: 40px 40px 0 0;
+  z-index: 0;
+}
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 /* ======= Headline ======= */
 h1 {
-  margin: 0 0 18px;
+  margin: 0 0 52px;
   font-size: clamp(26px, 3.6vw, 36px);
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #0b1220;
+  color: #fff;
 }
 h1::after {
   content: "";
@@ -65,8 +92,8 @@ h1::after {
   height: 6px;
   margin-top: 8px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--primary), transparent);
-  opacity: 0.65;
+  background: #fff;
+  opacity: 0.8;
 }
 
 /* ======= Layout ======= */
@@ -100,7 +127,7 @@ h1::after {
   font-size: 17px;
   font-weight: 800;
   letter-spacing: 0.2px;
-  color: #111827;
+  color: var(--navy-900);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -136,9 +163,9 @@ input[type="text"],
 input[type="number"],
 select {
   width: 100%;
-  background: #fbfdff;
+  background: var(--blue-50);
   color: var(--text);
-  border: 1px solid #d9e1f0;
+  border: 1px solid var(--line);
   border-radius: var(--r-md);
   padding: 12px 12px;
   outline: none;
@@ -150,8 +177,8 @@ input::placeholder {
 }
 input:focus,
 select:focus {
-  border-color: #b9cdfc;
-  box-shadow: 0 0 0 4px rgba(21, 94, 239, 0.14);
+  border-color: var(--primary-2);
+  box-shadow: 0 0 0 4px rgba(31, 63, 196, 0.15);
   transform: translateY(-1px);
   background: #ffffff;
 }
@@ -166,7 +193,7 @@ button {
   padding: 10px 14px;
   transition: transform 0.06s ease, box-shadow 0.2s ease, background 0.2s ease,
     color 0.2s ease;
-  box-shadow: 0 8px 16px rgba(2, 6, 23, 0.06);
+  box-shadow: 0 8px 16px rgba(10, 17, 86, 0.08);
 }
 button:active {
   transform: translateY(1px) scale(0.99);
@@ -176,28 +203,29 @@ button:active {
 #btnAddEquipo,
 #btnAddPregunta {
   color: #fff;
-  background: linear-gradient(135deg, var(--primary-2), var(--primary));
+  background: var(--primary);
 }
 #btnAddMateria:hover,
 #btnAddEquipo:hover,
 #btnAddPregunta:hover {
-  filter: brightness(1.06);
+  background: var(--primary-2);
 }
 
 .btn-iniciar {
   position: fixed;
   right: 24px;
   bottom: 24px;
-  background: linear-gradient(135deg, #60a5fa, var(--primary));
+  background: var(--primary);
   color: #ffffff;
-  border-radius: 16px;
+  border: 2px solid #fff;
+  border-radius: 18px;
   padding: 14px 18px;
   font-size: 16px;
   box-shadow: var(--shadow-2);
   z-index: 9;
 }
 .btn-iniciar:hover {
-  filter: brightness(1.05);
+  background: var(--primary-2);
 }
 
 /* Botones de fila (acciones) */
@@ -211,21 +239,21 @@ button:active {
   font-size: 14px;
 }
 .btn-delete {
-  background: linear-gradient(135deg, var(--danger), #b91c1c);
+  background: var(--danger);
   color: #fff;
 }
 .btn-edit {
-  background: linear-gradient(135deg, var(--warn), #b45309);
-  color: #111;
+  background: var(--warn);
+  color: #fff;
 }
 .btn-save {
-  background: linear-gradient(135deg, var(--success), #15803d);
-  color: #08130c;
+  background: var(--success);
+  color: #fff;
 }
 .btn-cancel {
-  background: #fbfdff;
+  background: var(--blue-50);
   color: var(--muted);
-  border: 1px solid #d9e1f0;
+  border: 1px solid var(--line);
 }
 .row-actions button:hover {
   filter: brightness(1.06);
@@ -241,7 +269,7 @@ ul {
 }
 li {
   background: #ffffff;
-  border: 1px solid #e6ecf6;
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
   padding: 12px;
   display: grid;
@@ -253,12 +281,12 @@ li {
 }
 li:hover {
   transform: translateY(-1px);
-  border-color: #d4def1;
-  box-shadow: 0 10px 20px rgba(2, 6, 23, 0.06);
+  border-color: #b9c6ee;
+  box-shadow: 0 10px 20px rgba(10, 17, 86, 0.08);
 }
 li .item-text {
   font-weight: 800;
-  color: #0b1220;
+  color: var(--navy-900);
 }
 .item-materia-strong {
   color: var(--primary);
@@ -294,8 +322,8 @@ li .item-text {
 /* ======= Inline Editors ======= */
 .inline-editor {
   margin-top: 10px;
-  background: #f4f7ff;
-  border: 1px dashed #c7d6ff;
+  background: var(--blue-50);
+  border: 1px dashed #aab6e0;
   padding: 12px;
   border-radius: var(--r-md);
 }
@@ -341,9 +369,9 @@ li .item-text {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid rgba(37, 99, 235, 0.35);
+  outline: 3px solid rgba(59, 99, 240, 0.4);
   outline-offset: 2px;
-  border-color: #93c5fd;
+  border-color: var(--primary-2);
 }
 
 /* ======= Microinteracciones ======= */
@@ -379,11 +407,11 @@ li,
   min-width: 260px;
   max-width: 360px;
   background: #ffffff;
-  color: #0f172a;
-  border: 1px solid #e6ecf6;
+  color: var(--navy-900);
+  border: 1px solid var(--line);
   border-left-width: 6px;
   border-left-color: var(--success);
-  box-shadow: 0 12px 24px rgba(2, 6, 23, 0.12);
+  box-shadow: 0 12px 24px rgba(10, 17, 86, 0.18);
   border-radius: 12px;
   padding: 12px 14px;
   display: grid;
@@ -404,7 +432,7 @@ li,
   border-radius: 8px;
 }
 .toast .close:hover {
-  background: #f3f4f6;
+  background: var(--blue-100);
 }
 
 /* ======= Scroll interno en listas ======= */
@@ -444,25 +472,25 @@ li,
 }
 .materias-section ul::-webkit-scrollbar-track,
 .equipos-section ul::-webkit-scrollbar-track {
-  background: #edf2ff;
+  background: var(--blue-100);
   border-radius: 10px;
 }
 .materias-section ul::-webkit-scrollbar-thumb,
 .equipos-section ul::-webkit-scrollbar-thumb {
-  background: #c7d2fe;
+  background: #9fb0ee;
   border-radius: 10px;
-  border: 2px solid #edf2ff;
+  border: 2px solid var(--blue-100);
 }
 .materias-section ul::-webkit-scrollbar-thumb:hover,
 .equipos-section ul::-webkit-scrollbar-thumb:hover {
-  background: #a5b4fc;
+  background: var(--primary-2);
 }
 
 /* Scrollbars (Firefox) */
 .materias-section ul,
 .equipos-section ul {
   scrollbar-width: thin;
-  scrollbar-color: #a5b4fc #edf2ff;
+  scrollbar-color: #9fb0ee var(--blue-100);
 }
 
 /* ======= Config compacta ======= */
@@ -513,21 +541,21 @@ li,
   position: absolute;
   top: 28px;
   right: 28px;
-  background: #34495e; /* Rojo muy suave */
-  color: #f9f9f9; /* Rojo oscuro para el texto */
+  background: #fff;
+  color: var(--navy-900);
   border: none;
   padding: 10px 16px;
   border-radius: 12px;
   text-decoration: none;
   font-weight: 800;
   font-size: 14px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   transition: all 0.2s ease;
   z-index: 10; /* Asegura que esté por encima de otros elementos */
 }
 
 .btn-logout:hover {
-  background: #2c3e50;
+  background: var(--blue-100);
   transform: translateY(-1px);
 }
 /* ======= Estilos para imágenes en preguntas ======= */
@@ -539,15 +567,15 @@ li,
 #imagenPregunta {
   width: 100%;
   padding: 10px;
-  border: 2px dashed #d9e1f0;
+  border: 2px dashed var(--line);
   border-radius: var(--r-md);
-  background: #fbfdff;
+  background: var(--blue-50);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 #imagenPregunta:hover {
-  border-color: #b9cdfc;
+  border-color: var(--primary-2);
   background: #ffffff;
 }
 
@@ -557,7 +585,7 @@ li,
   max-width: 300px;
   border-radius: var(--r-md);
   overflow: hidden;
-  border: 1px solid #e6ecf6;
+  border: 1px solid var(--line);
 }
 
 .image-preview.active {
@@ -599,7 +627,7 @@ li,
   max-width: 200px;
   max-height: 150px;
   border-radius: var(--r-md);
-  border: 1px solid #e6ecf6;
+  border: 1px solid var(--line);
   object-fit: cover;
 }
 
@@ -618,9 +646,9 @@ li,
 .inp-preg-imagen {
   width: 100%;
   padding: 10px;
-  border: 2px dashed #d9e1f0;
+  border: 2px dashed var(--line);
   border-radius: var(--r-md);
-  background: #fbfdff;
+  background: var(--blue-50);
   cursor: pointer;
 }
 
@@ -632,7 +660,7 @@ li,
 .editor-preview-container img {
   width: 100%;
   border-radius: var(--r-md);
-  border: 1px solid #e6ecf6;
+  border: 1px solid var(--line);
 }
 
 .editor-preview-container.active {

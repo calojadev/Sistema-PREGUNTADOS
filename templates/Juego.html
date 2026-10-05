@@ -1,157 +1,265 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ingenia Unida</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ingenia Unida</title>
 
-  <!-- Fuente Poppins garantizada -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Fuente Poppins garantizada -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
 
-  <link rel="stylesheet" href="{{ url_for('static', filename='styleJuego.css') }}" />
-  <script src="{{ url_for('static', filename='js/scriptJuego.js') }}" defer></script>
-</head>
-<body>
- 
-  <div class="logos-container">
-    <img src="{{ url_for('static', filename='img/img1.png') }}" alt="Logo Facultad 1" class="logo">
-    <img src="{{ url_for('static', filename='img/img2.png') }}" alt="Logo Facultad 2" class="logo">
-  </div>
-
-  <div class="main-container">
-    <h1 class="title">INGENIA</h1>
-
-    <div id="tournament-status" class="tournament-status" style="display:none;"></div>
-
-    <!-- Banner de desempate (controlado por JS) -->
-    <div id="desempate-banner" class="desempate-banner" style="display:none;">
-      🔥 Empate: se juega un desempate a mejor de 3 preguntas.
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styleJuego.css') }}"
+    />
+    <script
+      src="{{ url_for('static', filename='js/scriptJuego.js') }}"
+      defer
+    ></script>
+  </head>
+  <body>
+    <div class="logos-container">
+      <img
+        src="{{ url_for('static', filename='img/img1.png') }}"
+        alt="Logo Facultad 1"
+        class="logo"
+      />
+      <img
+        src="{{ url_for('static', filename='img/img2.png') }}"
+        alt="Logo Facultad 2"
+        class="logo"
+      />
     </div>
 
-    <div id="competition-area" class="competition-area">
-      <!-- Panel equipo 1 -->
-      <div id="team-display-1" class="team-display"></div>
+    <div class="main-container">
+      <!-- <h1 class="title">INGENIA</h1> -->
 
-      <div class="game-column">
-        <div id="game-area" class="game-area">
-          <div class="arrow"></div>
-          <canvas id="ruleta" width="350" height="350"></canvas>
-          <button id="boton-girar" class="btn-spin">Girar Ruleta</button>
-        </div>
+      <img
+        src="{{ url_for('static', filename='img/logo_ingenia.png') }}"
+        alt="Logo Ingenia"
+        class="logo-ingenia"
+      />
 
-        <div id="question-container" class="question-container" style="display:none;">
-          <div class="category-tag">Modalidad: <strong id="categoria-seleccionada"></strong></div>
+      <div
+        id="tournament-status"
+        class="tournament-status"
+        style="display: none"
+      ></div>
 
-          <!-- NUEVO: Contenedor para pregunta texto o imagen -->
-          <div id="pregunta-content-wrapper" class="pregunta-content-wrapper">
-            <h3 id="pregunta-titulo"></h3>
-            <div id="pregunta-imagen-container" class="pregunta-imagen-container" style="display:none;">
-              <img id="pregunta-imagen" alt="Pregunta en imagen" />
+      <!-- Banner de desempate (controlado por JS) -->
+      <div id="desempate-banner" class="desempate-banner" style="display: none">
+        🔥 Empate: se juega un desempate a mejor de 3 preguntas.
+      </div>
+
+      <div id="competition-area" class="competition-area">
+        <!-- Panel equipo 1 -->
+        <div id="team-display-1" class="team-display"></div>
+
+        <div class="game-column">
+          <div id="game-area" class="game-area">
+            <div class="arrow"></div>
+            <canvas id="ruleta" width="350" height="350"></canvas>
+            <button id="boton-girar" class="btn-spin">Girar Ruleta</button>
+          </div>
+
+          <div
+            id="question-container"
+            class="question-container"
+            style="display: none"
+          >
+            <div class="category-tag">
+              Modalidad: <strong id="categoria-seleccionada"></strong>
             </div>
+
+            <!-- NUEVO: Contenedor para pregunta texto o imagen -->
+            <div id="pregunta-content-wrapper" class="pregunta-content-wrapper">
+              <h3 id="pregunta-titulo"></h3>
+              <div
+                id="pregunta-imagen-container"
+                class="pregunta-imagen-container"
+                style="display: none"
+              >
+                <img id="pregunta-imagen" alt="Pregunta en imagen" />
+              </div>
+            </div>
+
+            <!-- Gate de botoneras: habilitar manualmente tras leer la pregunta -->
+            <button
+              id="btn-habilitar-botoneras"
+              class="btn-habilitar-botoneras"
+              style="display: none"
+            >
+              🔔 Habilitar Botoneras
+            </button>
+
+            <div
+              id="seleccion-equipo-responder"
+              class="seleccion-equipo-responder"
+              style="display: none"
+            >
+              <h4>¿Quién responde?</h4>
+              <div
+                id="equipos-selector-respuesta"
+                class="equipos-selector-respuesta"
+              ></div>
+            </div>
+
+            <div
+              id="temporizador"
+              class="temporizador"
+              style="display: none"
+            ></div>
+
+            <!-- Contenedor de opciones (sin innerHTML) -->
+            <div
+              id="opciones-respuesta"
+              class="opciones-respuesta"
+              style="display: none"
+            ></div>
+
+            <!-- Panel de juicio manual del presentador (fases Directa / Pizarra) -->
+            <div
+              id="panel-juicio-manual"
+              class="panel-juicio-manual"
+              style="display: none"
+            >
+              <button
+                id="btn-juicio-correcto"
+                class="btn-juicio btn-juicio-correcto"
+              >
+                ✅ Correcto
+              </button>
+              <button
+                id="btn-juicio-incorrecto"
+                class="btn-juicio btn-juicio-incorrecto"
+              >
+                ❌ Incorrecto
+              </button>
+            </div>
+
+            <!-- Final (Pizarra): detener el tiempo si un equipo ya resolvió -->
+            <button
+              id="btn-detener-tiempo"
+              class="btn-juicio btn-detener-tiempo"
+              style="display: none"
+            >
+              ⏹️ DETENER TIEMPO
+            </button>
+
+            <!-- Final (Pizarra): el jurado anota quién acertó y avanza -->
+            <div
+              id="panel-jurado-final"
+              class="panel-jurado-final"
+              style="display: none"
+            >
+              <h4>Jurado: ¿quién resolvió bien este enunciado?</h4>
+              <div id="jurado-equipos" class="equipos-selector-respuesta"></div>
+              <button
+                id="btn-siguiente-enunciado"
+                class="btn-juicio btn-siguiente-enunciado"
+              ></button>
+            </div>
+
+            <!-- Aparece al agotarse el tiempo de respuesta -->
+            <button
+              id="btn-transferir-turno"
+              class="btn-juicio btn-transferir-turno"
+              style="display: none"
+            >
+              🔁 Transferir turno
+            </button>
+
+            <!-- Contenedor de feedback -->
+            <div
+              id="feedback-container"
+              class="feedback-container"
+              style="display: none"
+            ></div>
           </div>
 
-          <!-- Gate de botoneras: habilitar manualmente tras leer la pregunta -->
-          <button id="btn-habilitar-botoneras" class="btn-habilitar-botoneras" style="display:none;">
-            🔔 Habilitar Botoneras
-          </button>
-
-          <div id="seleccion-equipo-responder" class="seleccion-equipo-responder" style="display:none;">
-            <h4>¿Quién responde?</h4>
-            <div id="equipos-selector-respuesta" class="equipos-selector-respuesta"></div>
+          <!-- Final: el jurado elige al ganador tras los 3 enunciados -->
+          <div
+            id="seleccion-ganador-final"
+            class="seleccion-ganador-final"
+            style="display: none"
+          >
+            <div class="category-tag">🏆 Final</div>
+            <h3>¿Quién ganó la Final?</h3>
+            <div id="ganador-final-resumen" class="ganador-final-resumen"></div>
+            <div
+              id="ganador-final-equipos"
+              class="equipos-selector-respuesta"
+            ></div>
           </div>
 
-          <div id="temporizador" class="temporizador" style="display:none;"></div>
-
-          <!-- Contenedor de opciones (sin innerHTML) -->
-          <div id="opciones-respuesta" class="opciones-respuesta" style="display:none;"></div>
-
-          <!-- Panel de juicio manual del presentador (fases Directa / Pizarra) -->
-          <div id="panel-juicio-manual" class="panel-juicio-manual" style="display:none;">
-            <button id="btn-juicio-correcto" class="btn-juicio btn-juicio-correcto">✅ Correcto</button>
-            <button id="btn-juicio-incorrecto" class="btn-juicio btn-juicio-incorrecto">❌ Incorrecto</button>
+          <div
+            id="match-winner-display"
+            class="match-winner-display"
+            style="display: none"
+          >
+            <h3>Ganador del Enfrentamiento</h3>
+            <h2 id="match-winner-name"></h2>
           </div>
 
-          <!-- Final (Pizarra): detener el tiempo si un equipo ya resolvió -->
-          <button id="btn-detener-tiempo" class="btn-juicio btn-detener-tiempo" style="display:none;">
-            ⏹️ DETENER TIEMPO
-          </button>
-
-          <!-- Final (Pizarra): el jurado anota quién acertó y avanza -->
-          <div id="panel-jurado-final" class="panel-jurado-final" style="display:none;">
-            <h4>Jurado: ¿quién resolvió bien este enunciado?</h4>
-            <div id="jurado-equipos" class="equipos-selector-respuesta"></div>
-            <button id="btn-siguiente-enunciado" class="btn-juicio btn-siguiente-enunciado"></button>
-          </div>
-
-          <!-- Aparece al agotarse el tiempo de respuesta -->
-          <button id="btn-transferir-turno" class="btn-juicio btn-transferir-turno" style="display:none;">
-            🔁 Transferir turno
-          </button>
-
-          <!-- Contenedor de feedback -->
-          <div id="feedback-container" class="feedback-container" style="display:none;"></div>
+          <button
+            id="boton-siguiente"
+            class="btn-next"
+            style="display: none"
+          ></button>
         </div>
 
-        <!-- Final: el jurado elige al ganador tras los 3 enunciados -->
-        <div id="seleccion-ganador-final" class="seleccion-ganador-final" style="display:none;">
-          <div class="category-tag">🏆 Final</div>
-          <h3>¿Quién ganó la Final?</h3>
-          <div id="ganador-final-resumen" class="ganador-final-resumen"></div>
-          <div id="ganador-final-equipos" class="equipos-selector-respuesta"></div>
+        <!-- Panel equipo 2 -->
+        <div id="team-display-2" class="team-display"></div>
+      </div>
+    </div>
+
+    <!-- Modal campeón -->
+    <div id="winner-modal" class="modal" style="display: none">
+      <div class="modal-content">
+        <h2>🏆 ¡Campeón de la Competencia! 🏆</h2>
+        <h3 id="winner-team-name"></h3>
+      </div>
+    </div>
+
+    <!-- ============== BOTÓN LOGOUT ============== -->
+    <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar Sesión 🚪</a>
+
+    <button id="btn-volver-docente" class="btn-fixed-bottom">
+      Ir al Panel Docente
+    </button>
+
+    <!-- ============ PLANTILLAS (no visibles) ============ -->
+    <!-- Tarjeta de equipo (para evitar innerHTML en JS) -->
+    <template id="tpl-team-card">
+      <div class="team-card">
+        <div class="team-title"></div>
+
+        <div class="team-icon">
+          <!-- Botón bonito -->
+          <label class="file-label">
+            Seleccionar archivo
+            <input type="file" accept="image/*" class="file-input" />
+          </label>
+          <!-- Texto debajo -->
+          <div class="file-status">Ningún archivo seleccionado</div>
         </div>
 
-        <div id="match-winner-display"class="match-winner-display" style="display:none;">
-          <h3>Ganador del Enfrentamiento</h3>
-          <h2 id="match-winner-name"></h2>
+        <div class="points-container">
+          <span class="score"></span>
+          <div class="points-label">Pts.</div>
         </div>
-
-        <button id="boton-siguiente" class="btn-next" style="display: none;"></button>
       </div>
+    </template>
 
-      <!-- Panel equipo 2 -->
-      <div id="team-display-2" class="team-display"></div>
-    </div>
-  </div>
-
-  <!-- Modal campeón -->
-  <div id="winner-modal" class="modal" style="display:none;">
-    <div class="modal-content">
-      <h2> 🏆 ¡Campeón de la Competencia! 🏆</h2>
-      <h3 id="winner-team-name"></h3>
-    </div>
-  </div>
-
-   <!-- ============== BOTÓN LOGOUT ============== -->
-  <a href="{{ url_for('logout') }}" class="btn-logout">Cerrar Sesión 🚪</a>
-  
-  <button id="btn-volver-docente" class="btn-fixed-bottom">Ir al Panel Docente</button>
-
-
-  <!-- ============ PLANTILLAS (no visibles) ============ -->
-  <!-- Tarjeta de equipo (para evitar innerHTML en JS) -->
-  <template id="tpl-team-card">
-    <div class="team-card">
-      <div class="team-title"></div>
-
-      <div class="team-icon">
-        <!-- Botón bonito -->
-        <label class="file-label">
-          Seleccionar archivo
-          <input type="file" accept="image/*" class="file-input">
-        </label>
-        <!-- Texto debajo -->
-        <div class="file-status">Ningún archivo seleccionado</div>
-      </div>
-
-      <div class="points-container">
-        <span class="score"></span>
-        <div class="points-label">Pts.</div>
-      </div>
-    </div>
-  </template>
-
-
-  <!-- Toasts globales (accesibles, sin bloquear clics) -->
-  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
-</body>
+    <!-- Toasts globales (accesibles, sin bloquear clics) -->
+    <div
+      id="toast-container"
+      class="toast-container"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+  </body>
 </html>
