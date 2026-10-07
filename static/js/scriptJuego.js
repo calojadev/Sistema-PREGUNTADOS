@@ -267,11 +267,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const conImagen = candidatas.filter((p) => p.imagen_url);
         if (conImagen.length > 0) {
           candidatas = conImagen;
-        } else {
-          showToast(
-            "Sin preguntas con imagen para la Final; se usa una sin imagen.",
-            "warn",
-          );
         }
       }
 
