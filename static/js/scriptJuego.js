@@ -555,7 +555,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      dibujarRuleta();
+      redibujarRuleta();
       botonGirar.disabled = false;
 
       actualizarUI();
@@ -862,6 +862,15 @@ document.addEventListener("DOMContentLoaded", () => {
       return ctx;
     }
 
+    // Re-dimensiona y dibuja la ruleta; no hace nada si está oculta
+    // (display: none), porque con ancho 0 se perdería el bitmap del canvas.
+    function redibujarRuleta() {
+      if (ruletaCanvas.getBoundingClientRect().width === 0) return;
+      ruletaCtx = setupHiDPICanvas(ruletaCanvas);
+      dibujarRuleta();
+      updateArrowPosition();
+    }
+
     function updateArrowPosition() {
       if (!arrowEl) return;
       const triH = 18;
@@ -871,6 +880,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function dibujarRuleta() {
       const size = ruletaCanvas.getBoundingClientRect().width;
+      if (size <= 10) return;
       const center = size / 2;
       const radio = center - 5;
       ruletaCtx.clearRect(0, 0, size, size);
@@ -981,11 +991,7 @@ document.addEventListener("DOMContentLoaded", () => {
       girarRuletaHacia(idxObjetivo);
     };
 
-    window.addEventListener("resize", () => {
-      ruletaCtx = setupHiDPICanvas(ruletaCanvas);
-      dibujarRuleta();
-      updateArrowPosition();
-    });
+    window.addEventListener("resize", redibujarRuleta);
 
     btnVolverDocente.onclick = () => {
       window.location.href = "/docente";
